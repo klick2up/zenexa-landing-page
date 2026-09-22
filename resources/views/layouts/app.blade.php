@@ -236,6 +236,21 @@
                         <textarea name="message" required rows="3" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all outline-none bg-gray-50/50 resize-none text-sm @error('message') border-red-400 @enderror" placeholder="How can we help you?">{{ old('message') }}</textarea>
                         @error('message')<p class="text-xs text-accent mt-1">{{ $message }}</p>@enderror
                     </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1">Verification Code <span class="text-accent">*</span></label>
+                        <div class="flex items-center gap-2">
+                            <div class="flex items-center gap-1.5 bg-gray-50 border border-gray-200 rounded-xl p-1 flex-shrink-0">
+                                <span class="captcha-img-container inline-block overflow-hidden rounded-lg">
+                                    {!! captcha_img('flat') !!}
+                                </span>
+                                <button type="button" class="reload-captcha-btn p-1.5 text-gray-500 hover:text-accent hover:bg-gray-200 rounded-lg transition-colors duration-200 flex items-center justify-center" title="Refresh Code">
+                                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                            <input type="text" name="captcha" required class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all outline-none bg-gray-50/50 text-sm @error('captcha') border-red-400 @enderror" placeholder="Enter code">
+                        </div>
+                        @error('captcha')<p class="text-xs text-accent mt-1">{{ $message }}</p>@enderror
+                    </div>
                     <button type="submit" class="w-full py-3.5 rounded-xl bg-accent text-white font-semibold hover:bg-accent/90 transition-colors shadow-lg shadow-accent/30 flex items-center justify-center gap-2 text-sm">
                         Send Message <i data-lucide="send" class="w-4 h-4"></i>
                     </button>
@@ -250,6 +265,19 @@
             if (typeof lucide !== 'undefined') {
                 lucide.createIcons();
             }
+
+            document.addEventListener('click', function (e) {
+                const btn = e.target.closest('.reload-captcha-btn');
+                if (btn) {
+                    const container = btn.closest('div').querySelector('.captcha-img-container');
+                    if (container) {
+                        const img = container.querySelector('img');
+                        if (img) {
+                            img.src = '{{ captcha_src('flat') }}?' + Math.random();
+                        }
+                    }
+                }
+            });
 
             @if($errors->any() && !request()->routeIs('contact'))
                 // Auto-open modal if there are errors and we are not on the main contact page

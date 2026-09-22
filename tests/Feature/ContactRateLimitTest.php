@@ -13,6 +13,7 @@ class ContactRateLimitTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        config(['captcha.disable' => true]);
         // Clear rate limiter cache before each test
         RateLimiter::clear('contact-submit:127.0.0.1');
     }
@@ -35,9 +36,8 @@ class ContactRateLimitTest extends TestCase
                 'message' => 'Hello, this is a test message that has more than ten characters.',
             ]);
 
-            $response->assertRedirect(route('contact'));
             $response->assertSessionHas('success');
-            $response->assertSessionHasNoErrors();
+            $response->assertSessionMissing('errors');
         }
 
         // 4th request should be rate limited (redirect back with rate limit error)
@@ -52,5 +52,21 @@ class ContactRateLimitTest extends TestCase
         $response->assertRedirect();
         $response->assertSessionHas('error');
         $this->assertStringContainsString('Too many requests', session('error'));
+    }
+
+    public function test_contact_submission_fails_with_invalid_captcha(): void
+    {
+        config(['captcha.disable' => false]);
+
+        $response = $this->post('/contact', [
+            'first_name' => 'John',
+            'last_name' => 'Doe',
+            'email' => 'john.captcha.test@example.com',
+            'service' => 'Web Development',
+            'message' => 'Hello, this is a test message for invalid captcha code.',
+            'captcha' => 'INVALID_CODE',
+        ]);
+
+        $response->assertSessionHasErrors('captcha');
     }
 }

@@ -34,9 +34,17 @@ class ContactController extends Controller
             'email'      => ['required', 'email', 'max:255'],
             'service'    => ['nullable', 'string', 'max:200'],
             'message'    => ['required', 'string', 'min:10', 'max:5000'],
+            'captcha'    => ['required', 'captcha'],
+            'website'    => ['nullable', 'max:0'],
+        ], [
+            'captcha.required' => 'Please enter the verification code.',
+            'captcha.captcha'  => 'Invalid verification code. Please try again.',
         ]);
         // check 
-        
+        if($validated["website"]!=null)
+        {
+            return redirect()->route('contact')->with('error', 'Spam detected. We cannot accept your inquiry. Please remove your website and try again.');
+        }
         if(Lead::where("email",$validated["email"])->first())
         {
             return redirect()->route('contact')->with('error', 'You have already submitted an inquiry. We will respond within 2–4 hours.');

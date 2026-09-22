@@ -156,7 +156,8 @@
                                     placeholder="Doe">
                             </div>
                         </div>
-
+                        <input type="text" name="website" tabindex="-1" autocomplete="off"
+       style="position:absolute;left:-9999px;">
                         <div>
                             <label for="email" class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Email Address <span class="text-accent">*</span></label>
                             <input type="email" id="email" name="email" value="{{ old('email', request('email')) }}" required
@@ -188,6 +189,24 @@
                             @error('message')<p class="text-xs text-accent mt-1">{{ $message }}</p>@enderror
                         </div>
 
+                        <div>
+                            <label for="captcha" class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Verification Code <span class="text-accent">*</span></label>
+                            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                                <div class="flex items-center gap-2 bg-white border border-gray-200 rounded-xl p-1.5 flex-shrink-0 shadow-sm">
+                                    <span class="captcha-img-container inline-block overflow-hidden rounded-lg">
+                                        {!! captcha_img('flat') !!}
+                                    </span>
+                                    <button type="button" class="reload-captcha-btn p-2 text-gray-500 hover:text-accent hover:bg-gray-100 rounded-lg transition-colors duration-200 flex items-center justify-center" title="Refresh Code">
+                                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                                <input type="text" id="captcha" name="captcha" required
+                                    class="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm text-primary focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all duration-300 @error('captcha') border-red-400 @enderror"
+                                    placeholder="Enter verification code">
+                            </div>
+                            @error('captcha')<p class="text-xs text-accent mt-1">{{ $message }}</p>@enderror
+                        </div>
+
                         <button type="submit"
                             class="w-full bg-accent hover:bg-primary text-white font-bold py-4 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2">
                             <i data-lucide="send" class="w-4 h-4"></i> Send Message
@@ -198,5 +217,23 @@
         </div>
     </div>
 </section>
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.reload-captcha-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const container = this.closest('div').querySelector('.captcha-img-container');
+                if (container) {
+                    const img = container.querySelector('img');
+                    if (img) {
+                        img.src = '{{ captcha_src('flat') }}?' + Math.random();
+                    }
+                }
+            });
+        });
+    });
+</script>
+@endsection
 
 @endsection
